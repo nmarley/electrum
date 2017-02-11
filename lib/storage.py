@@ -22,7 +22,6 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
 import os
 import ast
 import threading
@@ -33,10 +32,10 @@ import copy
 import re
 import stat
 
-from i18n import _
-from util import NotEnoughFunds, PrintError, profiler
-from plugins import run_hook, plugin_loaders
-from keystore import bip44_derivation
+from .i18n import _
+from .util import NotEnoughFunds, PrintError, profiler
+from .plugins import run_hook, plugin_loaders
+from .keystore import bip44_derivation
 
 
 # seed_version is now used for the version of the wallet file
@@ -73,7 +72,6 @@ class WalletStorage(PrintError):
         l = plugin_loaders.get(t)
         if l: l()
 
-
     def read(self, path):
         """Read the contents of the wallet file."""
         try:
@@ -92,12 +90,6 @@ class WalletStorage(PrintError):
             except Exception as e:
                 raise IOError("Cannot read wallet file '%s'" % self.path)
             self.data = {}
-            # In old versions of Electrum labels were latin1 encoded, this fixes breakage.
-            for i, label in labels.items():
-                try:
-                    unicode(label)
-                except UnicodeDecodeError:
-                    d['labels'][i] = unicode(label.decode('latin1'))
             for key, value in d.items():
                 try:
                     json.dumps(key)

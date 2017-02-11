@@ -23,7 +23,12 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import socket
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
+import six
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
@@ -31,7 +36,7 @@ from electrum.i18n import _
 from electrum.network import DEFAULT_PORTS
 from electrum.network import serialize_server, deserialize_server
 
-from util import *
+from .util import *
 
 protocol_names = ['TCP', 'SSL']
 protocol_letters = 'ts'
@@ -210,7 +215,7 @@ class NetworkChoiceLayout(object):
 
     def change_protocol(self, use_ssl):
         p = 's' if use_ssl else 't'
-        host = unicode(self.server_host.text())
+        host = self.server_host.text()
         pp = self.servers.get(host, DEFAULT_PORTS)
         if p not in pp.keys():
             p = pp.keys()[0]

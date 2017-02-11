@@ -22,30 +22,39 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
+import six
 import ast
 import os
 import sys
 import time
 
-import jsonrpclib
-from jsonrpclib.SimpleJSONRPCServer import SimpleJSONRPCServer, SimpleJSONRPCRequestHandler
+# from jsonrpc import JSONRPCResponseManager
+# import jsonrpclib
+# from jsonrpclib.SimpleJSONRPCServer import SimpleJSONRPCServer, SimpleJSONRPCRequestHandler
 
-from version import ELECTRUM_VERSION
-from network import Network
-from util import json_decode, DaemonThread
-from util import print_msg, print_error, print_stderr
-from wallet import WalletStorage, Wallet
-from commands import known_commands, Commands
-from simple_config import SimpleConfig
-from plugins import run_hook
-from exchange_rate import FxThread
+from .version import ELECTRUM_VERSION
+from .network import Network
+from .util import json_decode, DaemonThread
+from .util import print_msg, print_error, print_stderr
+from .wallet import WalletStorage, Wallet
+from .commands import known_commands, Commands
+from .simple_config import SimpleConfig
+from .plugins import run_hook
+from .exchange_rate import FxThread
+
 
 def get_lockfile(config):
     return os.path.join(config.path, 'daemon')
 
+
 def remove_lockfile(lockfile):
     os.unlink(lockfile)
+
 
 def get_fd_or_server(config):
     '''Tries to create the lockfile, using O_EXCL to
@@ -65,6 +74,7 @@ def get_fd_or_server(config):
         # Couldn't connect; remove lockfile and try again.
         remove_lockfile(lockfile)
 
+
 def get_server(config):
     lockfile = get_lockfile(config)
     while True:
@@ -76,7 +86,8 @@ def get_server(config):
             # Test daemon is running
             server.ping()
             return server
-        except:
+        except Exception as e:
+            print_error(e)
             pass
         if not create_time or create_time < time.time() - 1.0:
             return None
@@ -84,18 +95,17 @@ def get_server(config):
         time.sleep(1.0)
 
 
-
-class RequestHandler(SimpleJSONRPCRequestHandler):
-
-    def do_OPTIONS(self):
-        self.send_response(200)
-        self.end_headers()
-
-    def end_headers(self):
-        self.send_header("Access-Control-Allow-Headers",
-                         "Origin, X-Requested-With, Content-Type, Accept")
-        self.send_header("Access-Control-Allow-Origin", "*")
-        SimpleJSONRPCRequestHandler.end_headers(self)
+# class RequestHandler(SimpleJSONRPCRequestHandler):
+#
+#     def do_OPTIONS(self):
+#         self.send_response(200)
+#         self.end_headers()
+#
+#     def end_headers(self):
+#         self.send_header("Access-Control-Allow-Headers",
+#                          "Origin, X-Requested-With, Content-Type, Accept")
+#         self.send_header("Access-Control-Allow-Origin", "*")
+#         SimpleJSONRPCRequestHandler.end_headers(self)
 
 
 class Daemon(DaemonThread):
@@ -123,24 +133,24 @@ class Daemon(DaemonThread):
     def init_server(self, config, fd):
         host = config.get('rpchost', '127.0.0.1')
         port = config.get('rpcport', 0)
-        try:
-            server = SimpleJSONRPCServer((host, port), logRequests=False,
-                                         requestHandler=RequestHandler)
-        except:
-            self.print_error('Warning: cannot initialize RPC server on host', host)
-            self.server = None
-            os.close(fd)
-            return
-        os.write(fd, repr((server.socket.getsockname(), time.time())))
-        os.close(fd)
-        server.timeout = 0.1
-        for cmdname in known_commands:
-            server.register_function(getattr(self.cmd_runner, cmdname), cmdname)
-        server.register_function(self.run_cmdline, 'run_cmdline')
-        server.register_function(self.ping, 'ping')
-        server.register_function(self.run_daemon, 'daemon')
-        server.register_function(self.run_gui, 'gui')
-        self.server = server
+        # try:
+        #     server = SimpleJSONRPCServer((host, port), logRequests=False, requestHandler=RequestHandler)
+        # except Exception as e:
+        #     self.print_error('Warning: cannot initialize RPC server on host', host, e)
+        #     self.server = None
+        #     os.close(fd)
+        #     return
+        # os.write(fd, bytes(repr((server.socket.getsockname(), time.time())), 'utf8'))
+        # os.close(fd)
+        # server.timeout = 0.1
+        # for cmdname in known_commands:
+        #     server.register_function(getattr(self.cmd_runner, cmdname), cmdname)
+        # server.register_function(self.run_cmdline, 'run_cmdline')
+        # server.register_function(self.ping, 'ping')
+        # server.register_function(self.run_daemon, 'daemon')
+        # server.register_function(self.run_gui, 'gui')
+        # self.server = server
+        self.server = None
 
     def ping(self):
         return True
@@ -222,9 +232,9 @@ class Daemon(DaemonThread):
         # arguments passed to function
         args = map(lambda x: config.get(x), cmd.params)
         # decode json arguments
-        args = map(json_decode, args)
+        args = [json_decode(i) for i in args]
         # options
-        args += map(lambda x: config.get(x), cmd.options)
+        args += list(map(lambda x: config.get(x), cmd.options))
         cmd_runner = Commands(config, wallet, self.network,
                               password=config_options.get('password'),
                               new_password=config_options.get('new_password'))
