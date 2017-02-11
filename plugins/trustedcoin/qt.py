@@ -28,8 +28,8 @@ from threading import Thread
 import re
 from decimal import Decimal
 
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
 
 from electrum_gui.qt.util import *
 from electrum_gui.qt.qrcodewidget import QRCodeWidget

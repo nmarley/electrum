@@ -4,9 +4,10 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import six
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
-import PyQt4.QtGui as QtGui
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
+import PyQt5.QtGui as QtGui
 
 import os
 import qrcode

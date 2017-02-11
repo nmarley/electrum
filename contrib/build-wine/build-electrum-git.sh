@@ -49,8 +49,8 @@ cp -r ../../../packages $WINEPREFIX/drive_c/electrum/
 cp -r ../../../lib/locale $WINEPREFIX/drive_c/electrum/lib/
 
 # Build Qt resources
-wine $WINEPREFIX/drive_c/Python27/Lib/site-packages/PyQt4/pyrcc4.exe C:/electrum/icons.qrc -o C:/electrum/lib/icons_rc.py
-wine $WINEPREFIX/drive_c/Python27/Lib/site-packages/PyQt4/pyrcc4.exe C:/electrum/icons.qrc -o C:/electrum/gui/qt/icons_rc.py
+wine $WINEPREFIX/drive_c/Python27/Lib/site-packages/PyQt5/pyrcc5.exe C:/electrum/icons.qrc -o C:/electrum/lib/icons_rc.py
+wine $WINEPREFIX/drive_c/Python27/Lib/site-packages/PyQt5/pyrcc5.exe C:/electrum/icons.qrc -o C:/electrum/gui/qt/icons_rc.py
 
 cd ..
 

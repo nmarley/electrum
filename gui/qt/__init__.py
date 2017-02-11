@@ -28,13 +28,15 @@ import os
 import signal
 
 try:
-    import PyQt4
+    import PyQt5
 except Exception:
-    sys.exit("Error: Could not import PyQt4 on Linux systems, you may try 'sudo apt-get install python-qt4'")
+    sys.exit("Error: Could not import PyQt5. On Linux systems, you may try \
+             'sudo apt-get install python3-pyqt5'")
 
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
-import PyQt4.QtCore as QtCore
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
+import PyQt5.QtCore as QtCore
 
 from electrum.i18n import _, set_language
 from electrum.plugins import run_hook
@@ -52,7 +54,7 @@ try:
 except Exception as e:
     print(e)
     print("Error: Could not find icons file.")
-    print("Please run 'pyrcc4 icons.qrc -o gui/qt/icons_rc.py', and reinstall Electrum")
+    print("Please run 'pyrcc5 icons.qrc -o gui/qt/icons_rc.py', and reinstall Electrum")
     sys.exit(1)
 
 from .util import *   # * needed for plugins
@@ -73,7 +75,7 @@ class OpenFileEventFilter(QObject):
 
 
 
-class ElectrumGui:
+class ElectrumGui(object):
 
     def __init__(self, config, daemon, plugins):
         set_language(config.get('language'))

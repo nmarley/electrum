@@ -35,10 +35,10 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email.encoders import encode_base64
 
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
-import PyQt4.QtCore as QtCore
-import PyQt4.QtGui as QtGui
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
+import PyQt5.QtCore as QtCore
+import PyQt5.QtGui as QtGui
 
 from electrum.plugins import BasePlugin, hook
 from electrum.paymentrequest import PaymentRequest
