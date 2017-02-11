@@ -28,8 +28,8 @@ import threading
 import time
 from xmlrpc.client import ServerProxy
 
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
 
 from electrum import bitcoin, util
 from electrum import transaction

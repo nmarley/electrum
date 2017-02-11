@@ -1,8 +1,8 @@
 import threading
 
-from PyQt4.Qt import (QDialog, QInputDialog, QLineEdit,
-                      QVBoxLayout, QLabel, SIGNAL)
-import PyQt4.QtCore as QtCore
+from PyQt5.QtWidgets import (QDialog, QInputDialog, QLineEdit,
+                             QVBoxLayout, QLabel)
+import PyQt5.QtCore as QtCore
 
 from electrum.i18n import _
 from .ledger import LedgerPlugin
@@ -28,7 +28,10 @@ class Ledger_Handler(QtHandlerBase):
         self.auth_signal.connect(self.auth_dialog)
 
     def word_dialog(self, msg):
-        response = QInputDialog.getText(self.top_level_window(), "Ledger Wallet Authentication", msg, QLineEdit.Password)
+        response = QInputDialog.getText(self.top_level_window(),
+                                        "Ledger Wallet Authentication",
+                                        msg,
+                                        QLineEdit.Password)
         if not response[1]:
             self.word = None
         else:
@@ -37,7 +40,8 @@ class Ledger_Handler(QtHandlerBase):
     
     def message_dialog(self, msg):
         self.clear_dialog()
-        self.dialog = dialog = WindowModalDialog(self.top_level_window(), _("Ledger Status"))
+        self.dialog = dialog = WindowModalDialog(self.top_level_window(),
+                                                 _("Ledger Status"))
         l = QLabel(msg)
         vbox = QVBoxLayout(dialog)
         vbox.addWidget(l)

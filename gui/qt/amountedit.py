@@ -5,8 +5,9 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import six
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 
 from decimal import Decimal
 from electrum.util import format_satoshis_plain

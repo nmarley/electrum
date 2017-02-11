@@ -7,9 +7,9 @@ import six
 import sys
 import os
 
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
-import PyQt4.QtCore as QtCore
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
+import PyQt5.QtCore as QtCore
 
 import electrum
 from electrum.wallet import Wallet

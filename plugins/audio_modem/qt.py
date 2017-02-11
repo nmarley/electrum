@@ -10,8 +10,8 @@ from electrum_gui.qt.util import WaitingDialog, EnterButton, WindowModalDialog
 from electrum.util import print_msg, print_error
 from electrum.i18n import _
 
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
 
 try:
     import amodem.audio
