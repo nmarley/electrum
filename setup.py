@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # python setup.py sdist --format=zip,gztar
 
@@ -11,8 +11,8 @@ import argparse
 
 version = imp.load_source('version', 'lib/version.py')
 
-if sys.version_info[:3] < (2, 7, 0):
-    sys.exit("Error: Electrum requires Python version >= 2.7.0...")
+if sys.version_info[:3] < (3, 4, 0):
+    sys.exit("Error: Electrum requires Python version >= 3.4.0...")
 
 data_files = []
 
@@ -43,7 +43,6 @@ setup(
         'qrcode',
         'protobuf',
         'dnspython',
-        'jsonrpclib',
         'PySocks>=1.6.6',
     ],
     packages=[

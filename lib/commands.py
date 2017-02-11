@@ -22,7 +22,12 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
+import six
 import os
 import sys
 import datetime
@@ -35,17 +40,18 @@ import base64
 from functools import wraps
 from decimal import Decimal
 
-import util
-from util import print_msg, format_satoshis, print_stderr
-import bitcoin
-from bitcoin import is_address, hash_160, COIN, TYPE_ADDRESS
-import transaction
-from transaction import Transaction
-import paymentrequest
-from paymentrequest import PR_PAID, PR_UNPAID, PR_UNKNOWN, PR_EXPIRED
-import contacts
+from .import util
+from .util import print_msg, format_satoshis, print_stderr
+from .import bitcoin
+from .bitcoin import is_address,  hash_160, COIN, TYPE_ADDRESS
+import .transaction
+from .transaction import Transaction
+from .import paymentrequest
+from .paymentrequest import PR_PAID, PR_UNPAID, PR_UNKNOWN, PR_EXPIRED
+from .import contacts
+if six.PY3:
+    long = int
 known_commands = {}
-
 
 def satoshis(amount):
     # satoshi conversion must not be performed by the parser
@@ -53,7 +59,6 @@ def satoshis(amount):
 
 
 class Command:
-
     def __init__(self, func, s):
         self.name = func.__name__
         self.requires_network = 'n' in s
@@ -61,8 +66,8 @@ class Command:
         self.requires_password = 'p' in s
         self.description = func.__doc__
         self.help = self.description.split('.')[0] if self.description else None
-        varnames = func.func_code.co_varnames[1:func.func_code.co_argcount]
-        self.defaults = func.func_defaults
+        varnames = func.__code__.co_varnames[1:func.__code__.co_argcount]
+        self.defaults = func.__defaults__
         if self.defaults:
             n = len(self.defaults)
             self.params = list(varnames[:-n])
@@ -98,14 +103,14 @@ class Commands:
     def _run(self, method, args, password_getter):
         cmd = known_commands[method]
         if cmd.requires_password and self.wallet.has_password():
-            self._password = apply(password_getter,())
+            self._password = password_getter()
             if self._password is None:
                 return
         f = getattr(self, method)
         result = f(*args)
         self._password = None
         if self._callback:
-            apply(self._callback, ())
+            self._callback()
         return result
 
     @command('')
@@ -230,8 +235,8 @@ class Commands:
         tx = Transaction(tx)
         if privkey:
             pubkey = bitcoin.public_key_from_private_key(privkey)
-            h160 = bitcoin.hash_160(pubkey.decode('hex'))
-            x_pubkey = 'fd' + (chr(0) + h160).encode('hex')
+            h160 = bitcoin.hash_160(bfh(pubkey))
+            x_pubkey = 'fd' + bh2u(b'\x00' + h160)
             tx.sign({x_pubkey:privkey})
         else:
             self.wallet.sign_transaction(tx, self._password)
@@ -254,7 +259,7 @@ class Commands:
         """Create multisig address"""
         assert isinstance(pubkeys, list), (type(num), type(pubkeys))
         redeem_script = transaction.multisig_script(pubkeys, num)
-        address = bitcoin.hash160_to_p2sh(hash_160(redeem_script.decode('hex')))
+        address = bitcoin.hash160_to_p2sh(hash_160(bfh(redeem_script)))
         return {'address':address, 'redeemScript':redeem_script}
 
     @command('w')
@@ -565,8 +570,8 @@ class Commands:
         else:
             f = None
         if f is not None:
-            out = filter(lambda x: x.get('status')==f, out)
-        return map(self._format_request, out)
+            out = list(filter(lambda x: x.get('status')==f, out))
+        return list(map(self._format_request, out))
 
     @command('w')
     def getunusedaddress(self,force=False):
@@ -694,7 +699,7 @@ command_options = {
 
 
 # don't use floats because of rounding errors
-from transaction import tx_from_str
+from .transaction import tx_from_str
 json_loads = lambda x: json.loads(x, parse_float=lambda x: str(Decimal(x)))
 arg_types = {
     'num': int,

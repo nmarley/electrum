@@ -22,7 +22,6 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
 import os
 import ast
 import threading
@@ -36,11 +35,11 @@ import pbkdf2, hmac, hashlib
 import base64
 import zlib
 
-from i18n import _
-from util import NotEnoughFunds, PrintError, profiler
-from plugins import run_hook, plugin_loaders
-from keystore import bip44_derivation
-import bitcoin
+from .i18n import _
+from .util import NotEnoughFunds, PrintError, profiler
+from .plugins import run_hook, plugin_loaders
+from .keystore import bip44_derivation
+from . import bitcoin
 
 
 # seed_version is now used for the version of the wallet file

@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-#
 # Electrum - Lightweight Bitcoin Client
 # Copyright (c) 2012 Thomas Voegtlin
 #
@@ -22,10 +20,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
-
-from util import ThreadJob
-from bitcoin import *
+from .util import ThreadJob
+from .bitcoin import *
 
 
 class SPV(ThreadJob):
@@ -43,7 +39,7 @@ class SPV(ThreadJob):
         unverified = self.wallet.get_unverified_txs()
         for tx_hash, tx_height in unverified.items():
             # do not request merkle branch before headers are available
-            if tx_height>0 and tx_hash not in self.merkle_roots and tx_height <= lh:
+            if (tx_height > 0) and (tx_hash not in self.merkle_roots) and (tx_height <= lh):
                 request = ('blockchain.transaction.get_merkle',
                            [tx_hash, tx_height])
                 self.network.send([request], self.verify_merkle)
@@ -76,14 +72,12 @@ class SPV(ThreadJob):
         self.print_error("verified %s" % tx_hash)
         self.wallet.add_verified_tx(tx_hash, (tx_height, header.get('timestamp'), pos))
 
-
     def hash_merkle_root(self, merkle_s, target_hash, pos):
         h = hash_decode(target_hash)
         for i in range(len(merkle_s)):
             item = merkle_s[i]
-            h = Hash( hash_decode(item) + h ) if ((pos >> i) & 1) else Hash( h + hash_decode(item) )
+            h = Hash(hash_decode(item) + h) if ((pos >> i) & 1) else Hash(h + hash_decode(item))
         return hash_encode(h)
-
 
     def undo_verifications(self, height):
         tx_hashes = self.wallet.undo_verifications(height)

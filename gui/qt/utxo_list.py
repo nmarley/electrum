@@ -22,8 +22,7 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
-from util import *
+from .util import *
 from electrum.i18n import _
 from electrum.bitcoin import is_address
 
@@ -57,10 +56,10 @@ class UTXOList(MyTreeWidget):
             self.addChild(utxo_item)
 
     def create_menu(self, position):
-        selected = [str(x.data(0, Qt.UserRole).toString()) for x in self.selectedItems()]
+        selected = [x.data(0, Qt.UserRole) for x in self.selectedItems()]
         if not selected:
             return
         menu = QMenu()
-        coins = filter(lambda x: self.get_name(x) in selected, self.utxos)
+        coins = list(filter(lambda x: self.get_name(x) in selected, self.utxos))
         menu.addAction(_("Spend"), lambda: self.parent.spend_coins(coins))
         menu.exec_(self.viewport().mapToGlobal(position))

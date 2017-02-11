@@ -22,9 +22,14 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
+import six
 
-from util import *
+from .util import *
 from electrum.i18n import _
 from electrum.util import block_explorer_URL, format_satoshis, format_time
 from electrum.plugins import run_hook
@@ -70,7 +75,7 @@ class InvoiceList(MyTreeWidget):
         menu = QMenu()
         item = self.itemAt(position)
         key = str(item.data(0, 32).toString())
-        column = self.currentColumn()
+        column = self.currentColumn()        
         column_title = self.headerItem().text(column)
         column_data = item.text(column)
         pr = self.parent.invoices.get(key)
