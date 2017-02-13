@@ -30,6 +30,7 @@ from __future__ import unicode_literals
 import six
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 from .qrtextedit import ScanQRTextEdit
 
 import re
