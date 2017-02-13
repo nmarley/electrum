@@ -101,6 +101,8 @@ def wizard_dialog(func):
 
 # WindowModalDialog must come first as it overrides show_error
 class InstallWizard(QDialog, MessageBoxMixin, BaseWizard):
+    sig_accept = pyqtSignal(name='accept')
+    synchronized = pyqtSignal()
 
     def __init__(self, config, app, plugins, storage):
 
@@ -115,7 +117,9 @@ class InstallWizard(QDialog, MessageBoxMixin, BaseWizard):
         self.plugins = plugins
         self.language_for_seed = config.get('language')
         self.setMinimumSize(600, 400)
-        self.connect(self, QtCore.SIGNAL('accept'), self.accept)
+
+        self.sig_accept.connect(self.accept)
+
         self.title = QLabel()
         self.main_widget = QWidget()
         self.back_button = QPushButton(_("Back"), self)
@@ -402,8 +406,8 @@ class InstallWizard(QDialog, MessageBoxMixin, BaseWizard):
                     msg = _("Recovery successful")
                 else:
                     msg = _("No transactions found for this seed")
-                self.emit(QtCore.SIGNAL('synchronized'), msg)
-            self.connect(self, QtCore.SIGNAL('synchronized'), self.show_message)
+                self.synchronized.emit(msg)
+            self.synchronized.connect(self.show_message)
             t = threading.Thread(target = task)
             t.daemon = True
             t.start()
@@ -426,7 +430,7 @@ class InstallWizard(QDialog, MessageBoxMixin, BaseWizard):
         self.run(action)
 
     def terminate(self):
-        self.emit(QtCore.SIGNAL('accept'))
+        self.sig_accept.emit()
 
     def waiting_dialog(self, task, msg):
         self.please_wait.setText(MSG_GENERATING_WAIT)

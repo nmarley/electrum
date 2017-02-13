@@ -75,9 +75,12 @@ class OpenFileEventFilter(QObject):
 
 
 
-class ElectrumGui(object):
+class ElectrumGui(QObject):
+    sig_new_window = pyqtSignal(name='sig_new_window')
 
     def __init__(self, config, daemon, plugins):
+        QObject.__init__(self) # initialisation required for object inheritance
+
         set_language(config.get('language'))
         # Uncomment this call to verify objects are being properly
         # GC-ed when windows are closed
@@ -98,7 +101,7 @@ class ElectrumGui(object):
         self.tray.activated.connect(self.tray_activated)
         self.build_tray_menu()
         self.tray.show()
-        self.app.connect(self.app, QtCore.SIGNAL('new_window'), self.start_new_window)
+        self.sig_new_window.connect(self.start_new_window)
         run_hook('init_qt', self)
 
     def build_tray_menu(self):
@@ -140,7 +143,7 @@ class ElectrumGui(object):
 
     def new_window(self, path, uri=None):
         # Use a signal as can be called from daemon thread
-        self.app.emit(SIGNAL('new_window'), path, uri)
+        self.sig_new_window.emit(path, uri)
 
     def create_window_for_wallet(self, wallet):
         w = ElectrumWindow(self, wallet)

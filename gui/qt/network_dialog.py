@@ -135,9 +135,8 @@ class NetworkChoiceLayout(object):
 
         self.change_server(host, protocol)
         self.set_protocol(protocol)
-        self.servers_list_widget.connect(self.servers_list_widget,
-                                         SIGNAL('currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)'),
-                                         lambda x,y: self.server_changed(x))
+        # SIGNAL currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)
+        self.servers_list_widget.currentItemChanged.connect(lambda x, y: self.server_changed(x))
         grid.addWidget(self.servers_list_widget, 2, 1, 1, 3)
 
         def enable_set_server():
@@ -175,8 +174,8 @@ class NetworkChoiceLayout(object):
                 for w in [self.proxy_host, self.proxy_port, self.proxy_mode]: w.setEnabled(False)
 
         check_for_disable()
-        self.proxy_mode.connect(self.proxy_mode, SIGNAL('currentIndexChanged(int)'), check_for_disable)
-
+        # SIGNAL currentIndexChanged(int)
+        self.proxy_mode.currentIndexChanged.connect(check_for_disable)
         self.proxy_mode.setCurrentIndex(self.proxy_mode.findText(str(proxy_config.get("mode").upper())))
         self.proxy_host.setText(proxy_config.get("host"))
         self.proxy_port.setText(proxy_config.get("port"))

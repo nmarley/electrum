@@ -91,6 +91,12 @@ from electrum.paymentrequest import PR_UNPAID, PR_PAID, PR_UNKNOWN, PR_EXPIRED
 
 
 class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
+    sig_payment_request_ok = pyqtSignal(name='payment_request_ok')
+    sig_payment_request_error = pyqtSignal(name='payment_request_error')
+    sig_network = pyqtSignal(str, list, name='network')
+    new_fx_quotes = pyqtSignal()
+    new_fx_history = pyqtSignal()
+    timersignal = pyqtSignal()
 
     def __init__(self, gui_object, wallet):
         QMainWindow.__init__(self)
@@ -155,13 +161,13 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         for i in range(wrtabs.count()):
             QShortcut(QKeySequence("Alt+" + str(i + 1)), self, lambda i=i: wrtabs.setCurrentIndex(i))
 
-        self.connect(self, QtCore.SIGNAL('payment_request_ok'), self.payment_request_ok)
-        self.connect(self, QtCore.SIGNAL('payment_request_error'), self.payment_request_error)
+        self.sig_payment_request_ok.connect(self.payment_request_ok)
+        self.sig_payment_request_error.connect(self.payment_request_error)
         self.history_list.setFocus(True)
 
         # network callbacks
         if self.network:
-            self.connect(self, QtCore.SIGNAL('network'), self.on_network_qt)
+            self.sig_network.connect(self.on_network_qt)
             interests = ['updated', 'new_transaction', 'status',
                          'banner', 'verified', 'fee']
             # To avoid leaking references to "self" that prevent the
@@ -173,8 +179,8 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
             self.console.showMessage(self.network.banner)
             self.network.register_callback(self.on_quotes, ['on_quotes'])
             self.network.register_callback(self.on_history, ['on_history'])
-            self.connect(self, SIGNAL('new_fx_quotes'), self.on_fx_quotes)
-            self.connect(self, SIGNAL('new_fx_history'), self.on_fx_history)
+            self.new_fx_quotes.connect(self.on_fx_quotes)
+            self.new_fx_history.connect(self.on_fx_history)
 
         # update fee slider in case we missed the callback
         self.fee_slider.update()
@@ -183,14 +189,14 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         self.fetch_alias()
 
     def on_history(self, b):
-        self.emit(SIGNAL('new_fx_history'))
+        self.new_fx_history.emit()
 
     def on_fx_history(self):
         self.history_list.refresh_headers()
         self.history_list.update()
 
     def on_quotes(self, b):
-        self.emit(SIGNAL('new_fx_quotes'))
+        self.new_fx_quotes.emit()
 
     def on_fx_quotes(self):
         self.update_status()
@@ -264,7 +270,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
             self.tx_notifications.append(args[0])
         elif event in ['status', 'banner', 'verified', 'fee']:
             # Handle in GUI thread
-            self.emit(QtCore.SIGNAL('network'), event, *args)
+            self.sig_network.emit(event, *args)
         else:
             self.print_error("unexpected network message:", event, args)
 
@@ -290,7 +296,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
             alias = str(alias)
             def f():
                 self.alias_info = self.contacts.resolve_openalias(alias)
-                self.emit(SIGNAL('alias_received'))
+                self.alias_received.emit()
             t = threading.Thread(target=f)
             t.setDaemon(True)
             t.start()
@@ -562,7 +568,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         return fileName
 
     def connect_slots(self, sender):
-        self.connect(sender, QtCore.SIGNAL('timersignal'), self.timer_actions)
+        self.timersignal.connect(self.timer_actions)
 
     def timer_actions(self):
         # Note this runs in the GUI thread
@@ -1466,9 +1472,9 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
     def on_pr(self, request):
         self.payment_request = request
         if self.payment_request.verify(self.contacts):
-            self.emit(SIGNAL('payment_request_ok'))
+            self.sig_payment_request_ok.emit()
         else:
-            self.emit(SIGNAL('payment_request_error'))
+            self.sig_payment_request_error.emit()
 
     def pay_to_URI(self, URI):
         if not URI:
@@ -2095,16 +2101,16 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
                 if done:
                     break
                 private_keys[addr] = "\n".join(self.wallet.get_private_key(addr, password))
-                d.emit(SIGNAL('computing_privkeys'))
-            d.emit(SIGNAL('show_privkeys'))
+                d.computing_privkeys.emit()
+            d.show_privkeys.emit()
 
-        def show_privkeys():
+        def func_show_privkeys():
             s = "\n".join( map( lambda x: x[0] + "\t"+ x[1], private_keys.items()))
             e.setText(s)
             b.setEnabled(True)
 
-        d.connect(d, QtCore.SIGNAL('computing_privkeys'), lambda: e.setText("Please wait... %d/%d"%(len(private_keys),len(addresses))))
-        d.connect(d, QtCore.SIGNAL('show_privkeys'), show_privkeys)
+        d.computing_privkeys.connect(lambda: e.setText("Please wait... %d/%d"%(len(private_keys),len(addresses))))
+        d.show_privkeys.connect(func_show_privkeys)
         threading.Thread(target=privkeys_thread).start()
 
         if not d.exec_():
@@ -2443,7 +2449,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
             if alias:
                 self.fetch_alias()
         set_alias_color()
-        self.connect(self, SIGNAL('alias_received'), set_alias_color)
+        self.alias_received.connect(set_alias_color)
         alias_e.editingFinished.connect(on_alias_edit)
         id_widgets.append((alias_label, alias_e))
 
@@ -2680,7 +2686,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         if self.fx:
             self.fx.timeout = 0
 
-        self.disconnect(self, SIGNAL('alias_received'), set_alias_color)
+        self.disconnect()
 
         run_hook('close_settings_dialog')
         if self.need_restart:
