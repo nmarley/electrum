@@ -1162,7 +1162,7 @@ class Abstract_Wallet(PrintError):
         return False, None
 
     def get_payment_request(self, addr, config):
-        import util
+        import electrum.util as util
         r = self.receive_requests.get(addr)
         if not r:
             return
@@ -1198,7 +1198,7 @@ class Abstract_Wallet(PrintError):
         return out
 
     def get_request_status(self, key):
-        from paymentrequest import PR_PAID, PR_UNPAID, PR_UNKNOWN, PR_EXPIRED
+        from electrum.paymentrequest import PR_PAID, PR_UNPAID, PR_UNKNOWN, PR_EXPIRED
         r = self.receive_requests.get(key)
         if r is None:
             return PR_UNKNOWN
