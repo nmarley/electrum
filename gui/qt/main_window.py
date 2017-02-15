@@ -1489,7 +1489,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         w = QWidget()
         vbox = QVBoxLayout()
         w.setLayout(vbox)
-        vbox.setMargin(0)
+        vbox.setContentsMargins(0, 0, 0, 0)
         vbox.setSpacing(0)
         vbox.addWidget(l)
         buttons = QWidget()

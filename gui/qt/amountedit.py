@@ -60,7 +60,7 @@ class AmountEdit(MyLineEdit):
     def paintEvent(self, event):
         QLineEdit.paintEvent(self, event)
         if self.base_unit:
-            panel = QStyleOptionFrameV2()
+            panel = QStyleOptionFrame()
             self.initStyleOption(panel)
             textRect = self.style().subElementRect(QStyle.SE_LineEditContents, panel, self)
             textRect.adjust(2, 0, -10, 0)

@@ -10,6 +10,7 @@ import sys, os, re
 import traceback, platform
 from PyQt5 import QtCore
 from PyQt5 import QtGui
+from PyQt5.QtWidgets import *
 from electrum import util
 
 
@@ -21,9 +22,9 @@ else:
     MONOSPACE_FONT = 'monospace'
 
 
-class Console(QtGui.QPlainTextEdit):
+class Console(QPlainTextEdit):
     def __init__(self, prompt='>> ', startup_message='', parent=None):
-        QtGui.QPlainTextEdit.__init__(self, parent)
+        QPlainTextEdit.__init__(self, parent)
 
         self.prompt = prompt
         self.history = []
