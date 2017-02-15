@@ -38,7 +38,6 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import PyQt5.QtCore as QtCore
 
-from lib.util import bh2u, bfh
 from . import icons_rc
 
 from electrum import keystore
@@ -48,7 +47,7 @@ from electrum.i18n import _
 from electrum.util import (block_explorer, block_explorer_info, format_time,
                            block_explorer_URL, format_satoshis, PrintError,
                            format_satoshis_plain, NotEnoughFunds,
-                           UserCancelled)
+                           UserCancelled, bh2u, bfh)
 from electrum import Transaction, mnemonic
 from electrum import util, bitcoin, commands, coinchooser
 from electrum import SimpleConfig, paymentrequest
@@ -858,7 +857,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
             self.show_error(_('No message or amount'))
             return False
         i = self.expires_combo.currentIndex()
-        expiration = map(lambda x: x[1], expiration_values)[i]
+        expiration = list(map(lambda x: x[1], expiration_values))[i]
         req = self.wallet.make_payment_request(addr, amount, message, expiration)
         self.wallet.add_payment_request(req, self.config)
         self.sign_payment_request(addr)
@@ -1207,7 +1206,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
 
         def format(x):
             h = x.get('prevout_hash')
-            return h[0:10] + '...' + h[-10:] + ":%d"%x.get('prevout_n') + u'\t' + "%s"%x.get('address')
+            return h[0:10] + '...' + h[-10:] + ":%d"%x.get('prevout_n') + '\t' + "%s"%x.get('address')
 
         for item in self.pay_from:
             self.from_list.addTopLevelItem(QTreeWidgetItem( [format(item), self.format_amount(item['value']) ]))
@@ -1217,7 +1216,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         return label + '  <' + key + '>' if _type == 'address' else key
 
     def update_completions(self):
-        l = [self.get_contact_payto(key) for key in self.contacts.keys()]
+        l = [self.get_contact_payto(key) for key in list(self.contacts.keys())]
         self.completions.setStringList(l)
 
     def protected(func):
@@ -1306,7 +1305,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
             self.show_message(str(e))
             return
 
-        amount = tx.output_value() if self.is_max else sum(map(lambda x:x[2], outputs))
+        amount = tx.output_value() if self.is_max else sum([x[2] for x in outputs])
         fee = tx.get_fee()
 
         use_rbf = self.rbf_checkbox.isChecked()
@@ -1634,7 +1633,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         grid.addWidget(QLabel(_("Payment URL") + ':'), 4, 0)
         grid.addWidget(QLabel(pr.payment_url), 4, 1)
         grid.addWidget(QLabel(_("Outputs") + ':'), 5, 0)
-        outputs_str = '\n'.join(map(lambda x: x[1] + ' ' + self.format_amount(x[2])+ self.base_unit(), pr.get_outputs()))
+        outputs_str = '\n'.join([x[1] + ' ' + self.format_amount(x[2])+ self.base_unit() for x in pr.get_outputs()])
         grid.addWidget(QLabel(outputs_str), 5, 1)
         if pr.tx:
             grid.addWidget(QLabel(_("Transaction ID") + ':'), 6, 0)
@@ -2105,7 +2104,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
             d.show_privkeys.emit()
 
         def func_show_privkeys():
-            s = "\n".join( map( lambda x: x[0] + "\t"+ x[1], private_keys.items()))
+            s = "\n".join( [x[0] + "\t"+ x[1] for x in list(private_keys.items())])
             e.setText(s)
             b.setEnabled(True)
 
@@ -2141,7 +2140,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
             if is_csv:
                 transaction = csv.writer(f)
                 transaction.writerow(["address", "private_key"])
-                for addr, pk in pklist.items():
+                for addr, pk in list(pklist.items()):
                     transaction.writerow(["%34s"%addr,pk])
             else:
                 import json
@@ -2154,7 +2153,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
             f = open(labelsFile, 'r')
             data = f.read()
             f.close()
-            for key, value in json.loads(data).items():
+            for key, value in list(json.loads(data).items()):
                 self.wallet.set_label(key, value)
             self.show_message(_("Your labels were imported from") + " '%s'" % str(labelsFile))
         except (IOError, os.error) as reason:
@@ -2350,14 +2349,14 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         from electrum.i18n import languages
         lang_combo.addItems(list(languages.values()))
         try:
-            index = languages.keys().index(self.config.get("language",''))
+            index = list(languages.keys()).index(self.config.get("language",''))
         except Exception:
             index = 0
         lang_combo.setCurrentIndex(index)
         if not self.config.is_modifiable('language'):
             for w in [lang_combo, lang_label]: w.setEnabled(False)
         def on_lang(x):
-            lang_request = languages.keys()[lang_combo.currentIndex()]
+            lang_request = list(languages.keys())[lang_combo.currentIndex()]
             if lang_request != self.config.get('language'):
                 self.config.set_key("language", lang_request, True)
                 self.need_restart = True
@@ -2524,7 +2523,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         system_cameras = qrscanner._find_system_cameras()
         qr_combo = QComboBox()
         qr_combo.addItem("Default","default")
-        for camera, device in system_cameras.items():
+        for camera, device in list(system_cameras.items()):
             qr_combo.addItem(camera, device)
         #combo.addItem("Manually specify a device", config.get("video_device"))
         index = qr_combo.findData(self.config.get("video_device"))
@@ -2573,7 +2572,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         choosers = sorted(coinchooser.COIN_CHOOSERS.keys())
         chooser_name = coinchooser.get_name(self.config)
         msg = _('Choose coin (UTXO) selection method.  The following are available:\n\n')
-        msg += '\n\n'.join(fmt_docs(*item) for item in coinchooser.COIN_CHOOSERS.items())
+        msg += '\n\n'.join(fmt_docs(*item) for item in list(coinchooser.COIN_CHOOSERS.items()))
         chooser_label = HelpLabel(_('Coin selection') + ':', msg)
         chooser_combo = QComboBox()
         chooser_combo.addItems(choosers)
@@ -2773,7 +2772,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
                 cb.clicked.connect(partial(do_toggle, cb, name, i))
                 msg = descr['description']
                 if descr.get('requires'):
-                    msg += '\n\n' + _('Requires') + ':\n' + '\n'.join(map(lambda x: x[1], descr.get('requires')))
+                    msg += '\n\n' + _('Requires') + ':\n' + '\n'.join([x[1] for x in descr.get('requires')])
                 grid.addWidget(HelpButton(msg), i, 2)
             except Exception:
                 self.print_msg("error: cannot display plugin", name)

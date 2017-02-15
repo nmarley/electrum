@@ -22,10 +22,10 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+
+
+
+
 
 import binascii
 import os, sys, re, json
@@ -35,7 +35,7 @@ from collections import defaultdict
 from datetime import datetime
 from decimal import Decimal
 import traceback
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import threading
 from .i18n import _
 
@@ -109,7 +109,7 @@ class DebugMem(ThreadJob):
             for class_ in self.classes:
                 if isinstance(obj, class_):
                     objmap[class_].append(obj)
-        for class_, objs in objmap.items():
+        for class_, objs in list(objmap.items()):
             self.print_error("%s: %d" % (class_.__name__, len(objs)))
         self.print_error("Finish memscan")
 
@@ -533,11 +533,11 @@ def parse_URI(uri, on_pr=None):
     else:
         pq = urllib_parse.parse_qs(u.query)
 
-    for k, v in pq.items():
+    for k, v in list(pq.items()):
         if len(v)!=1:
             raise Exception('Duplicate Key', k)
 
-    out = {k: v[0] for k, v in pq.items()}
+    out = {k: v[0] for k, v in list(pq.items())}
     if address:
         if not bitcoin.is_address(address):
             raise BaseException("Invalid bitcoin address:" + address)
@@ -592,9 +592,9 @@ def create_URI(addr, amount, message):
     if amount:
         query.append('amount=%s'%format_satoshis_plain(amount))
     if message:
-        if type(message) == unicode:
+        if type(message) == str:
             message = message.encode('utf8')
-        query.append('message=%s'%urllib.quote(message))
+        query.append('message=%s'%urllib.parse.quote(message))
     p = urllib_parse.ParseResult(scheme='bitcoin', netloc='', path=addr, params='', query='&'.join(query), fragment='')
     return urllib_parse.urlunparse(p)
 
@@ -688,7 +688,7 @@ class SocketPipe:
         self._send(out)
 
     def send_all(self, requests):
-        out = b''.join(map(lambda x: (json.dumps(x) + '\n').encode('utf8'), requests))
+        out = b''.join([(json.dumps(x) + '\n').encode('utf8') for x in requests])
         self._send(out)
 
     def _send(self, out):
@@ -749,7 +749,7 @@ class QueuePipe:
 
 
 def check_www_dir(rdir):
-    import urllib, shutil, os
+    import urllib.request, urllib.parse, urllib.error, shutil, os
     if not os.path.exists(rdir):
         os.mkdir(rdir)
     index = os.path.join(rdir, 'index.html')
@@ -769,4 +769,4 @@ def check_www_dir(rdir):
         path = os.path.join(rdir, filename)
         if not os.path.exists(path):
             print_error("downloading ", URL)
-            urllib.urlretrieve(URL, path)
+            urllib.request.urlretrieve(URL, path)
