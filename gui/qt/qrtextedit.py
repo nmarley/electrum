@@ -3,11 +3,11 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import six
 from electrum.i18n import _
 from electrum.plugins import run_hook
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
 
 from .util import ButtonsTextEdit, MessageBoxMixin
 
@@ -45,7 +45,7 @@ class ScanQRTextEdit(ButtonsTextEdit, MessageBoxMixin):
         run_hook('scan_text_edit', self)
 
     def file_input(self):
-        fileName = QFileDialog.getOpenFileName(self, 'select file')
+        fileName = QFileDialog.getOpenFileName(self, 'select file')[0]
         if not fileName:
             return
         with open(fileName, "r") as f:
