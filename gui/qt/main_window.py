@@ -123,7 +123,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         self.need_update = threading.Event()
 
         self.decimal_point = config.get('decimal_point', 5)
-        self.num_zeros     = int(config.get('num_zeros',0))
+        self.num_zeros     = int(config.get('num_zeros', 0))
 
         self.completions = QStringListModel()
 
