@@ -1,29 +1,32 @@
-#!/usr/bin/python2
-
-import sys, re, shutil, os, hashlib
+import sys
+import re
+import shutil
+import os
+import hashlib
 import imp
 import getpass
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     d = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
     os.chdir(d)
     v = imp.load_source('version', 'lib/version.py')
     version = v.ELECTRUM_VERSION
-    print "version", version
+    print("version", version)
 
     # copy dependencies into 'packages' directory
     deps = [
         'pyaes',
         'ecdsa',
         'pbkdf2',
-        'requests', # note: requests-2.5.1 is needed to build with pyinstaller
+        'requests',  # note: requests-2.5.1 is needed to build with pyinstaller
         'qrcode',
         'google/protobuf',
         'dns',
         'six',
         'jsonrpclib',
     ]
+
     for module in deps:
         f, pathname, descr = imp.find_module(module)
         target = 'packages/' + module + descr[0]
@@ -40,7 +43,8 @@ if __name__ == '__main__':
     # fix google/__init__.py needed by pyinstaller
     n = 'packages/google/__init__.py'
     if not os.path.exists(n):
-        os.system("echo \# do not remove>%s"%n)
+        with open(n, 'w') as f:
+            f.write('# do not remove')
 
     # patch requests and add cacert.pem
     import requests
@@ -48,14 +52,12 @@ if __name__ == '__main__':
     n = 'packages/requests/certs.py'
     with open(n, 'r') as f:
         s = f.read()
-    s = s.replace("'%s'"%crt, "os.path.join(os.path.dirname(__file__), 'cacert.pem')")
+    s = s.replace("'%s'" % crt, "os.path.join(os.path.dirname(__file__), 'cacert.pem')")
     with open(n, 'w') as f:
-	f.write(s)
+        f.write(s)
     shutil.copy(crt, 'packages/requests/cacert.pem')
 
     os.system("pyrcc5 icons.qrc -o gui/qt/icons_rc.py")
     os.system("python setup.py sdist --format=zip,gztar")
 
-    print "Packages are ready in dist"
-
-
+    print("Packages are ready in dist")
