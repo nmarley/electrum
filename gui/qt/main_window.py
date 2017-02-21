@@ -92,7 +92,7 @@ from electrum.paymentrequest import PR_UNPAID, PR_PAID, PR_UNKNOWN, PR_EXPIRED
 class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
     sig_payment_request_ok = pyqtSignal(name='payment_request_ok')
     sig_payment_request_error = pyqtSignal(name='payment_request_error')
-    sig_network = pyqtSignal(str, list, name='sig_network')
+    sig_network = pyqtSignal(str, tuple, name='sig_network')
     new_fx_quotes = pyqtSignal()
     new_fx_history = pyqtSignal()
     timersignal = pyqtSignal()
@@ -267,11 +267,11 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
             self.tx_notifications.append(args[0])
         elif event in ['status', 'banner', 'verified', 'fee']:
             # Handle in GUI thread
-            self.sig_network.emit(event, *args)
+            self.sig_network.emit(event, args)
         else:
             self.print_error("unexpected network message:", event, args)
 
-    def on_network_qt(self, event, *args):
+    def on_network_qt(self, event, args):
         # Handle a network message in the GUI thread
         if event == 'status':
             self.update_status()
