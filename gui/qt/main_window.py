@@ -92,7 +92,7 @@ from electrum.paymentrequest import PR_UNPAID, PR_PAID, PR_UNKNOWN, PR_EXPIRED
 class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
     sig_payment_request_ok = pyqtSignal(name='payment_request_ok')
     sig_payment_request_error = pyqtSignal(name='payment_request_error')
-    sig_network = pyqtSignal(str, list, name='network')
+    sig_network = pyqtSignal(str, list, name='sig_network')
     new_fx_quotes = pyqtSignal()
     new_fx_history = pyqtSignal()
     timersignal = pyqtSignal()
