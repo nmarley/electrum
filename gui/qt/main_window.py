@@ -2406,6 +2406,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         alias_label = HelpLabel(_('OpenAlias') + ':', msg)
         alias = self.config.get('alias','')
         alias_e = QLineEdit(alias)
+
         def set_alias_color():
             if not self.config.get('alias'):
                 alias_e.setStyleSheet("")
@@ -2415,6 +2416,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
                 alias_e.setStyleSheet(GREEN_BG if validated else RED_BG)
             else:
                 alias_e.setStyleSheet(RED_BG)
+
         def on_alias_edit():
             alias_e.setStyleSheet("")
             alias = str(alias_e.text())
@@ -2431,6 +2433,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
             _('SSL certificate used to sign payment requests.'),
             _('Use setconfig to set ssl_chain and ssl_privkey.'),
         ])
+
         if self.config.get('ssl_privkey') or self.config.get('ssl_chain'):
             try:
                 SSL_identity = paymentrequest.check_ssl_config(self.config)
