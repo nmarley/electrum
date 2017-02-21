@@ -1131,6 +1131,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
                 _type, addr = self.get_payto_or_dummy()
                 outputs = [(_type, addr, amount)]
 
+            tx = None
             try:
                 tx = self.wallet.make_unsigned_transaction(self.get_coins(), outputs, self.config, fee)
                 self.not_enough_funds = False
@@ -1141,7 +1142,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
                 fee = None if self.not_enough_funds else self.wallet.get_tx_fee(tx)
                 self.fee_e.setAmount(fee)
 
-            if self.is_max:
+            if self.is_max and tx:
                 amount = tx.output_value()
                 self.amount_e.setAmount(amount)
 
