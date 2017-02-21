@@ -322,7 +322,7 @@ class TorDetector(QThread):
     @staticmethod
     def is_tor_port(port):
         try:
-            s = socket._socketobject(socket.AF_INET, socket.SOCK_STREAM)
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.settimeout(0.1)
             s.connect(("127.0.0.1", port))
             # Tor responds uniquely to HTTP-like requests
