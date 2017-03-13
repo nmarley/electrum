@@ -22,13 +22,12 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-import socket
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import six
+import socket
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
@@ -182,11 +181,11 @@ class NetworkChoiceLayout(object):
         self.proxy_user.setText(proxy_config.get("user", ""))
         self.proxy_password.setText(proxy_config.get("password", ""))
 
-        self.proxy_mode.connect(self.proxy_mode, SIGNAL('currentIndexChanged(int)'), self.proxy_settings_changed)
-        self.proxy_host.connect(self.proxy_host, SIGNAL('textEdited(QString)'), self.proxy_settings_changed)
-        self.proxy_port.connect(self.proxy_port, SIGNAL('textEdited(QString)'), self.proxy_settings_changed)
-        self.proxy_user.connect(self.proxy_user, SIGNAL('textEdited(QString)'), self.proxy_settings_changed)
-        self.proxy_password.connect(self.proxy_password, SIGNAL('textEdited(QString)'), self.proxy_settings_changed)
+        self.proxy_mode.currentIndexChanged.connect(self.proxy_settings_changed)
+        self.proxy_host.textEdited.connect(self.proxy_settings_changed)
+        self.proxy_port.textEdited.connect(self.proxy_settings_changed)
+        self.proxy_user.textEdited.connect(self.proxy_settings_changed)
+        self.proxy_password.textEdited.connect(self.proxy_settings_changed)
 
         grid.addWidget(QLabel(_('Proxy') + ':'), 4, 0)
         grid.addWidget(self.proxy_mode, 4, 1)
